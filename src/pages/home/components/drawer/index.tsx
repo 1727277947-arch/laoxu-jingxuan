@@ -178,20 +178,6 @@ function HomeDrawer(props: any) {
                             {`${t("sidebar.currentVersion")}${deviceInfoModule.getVersion()}`}
                         </ListItem.ListItemText>
                     </ListItem>
-                    <ListItem
-                        withHorizontalPadding
-                        key={"about"}
-                        onPress={() => {
-                            navigateToSetting("about");
-                        }}>
-                        <ListItem.ListItemIcon
-                            icon={"information-circle"}
-                            width={rpx(48)}
-                        />
-                        <ListItem.Content
-                            title={`${t("common.about")} ${deviceInfoModule.getApplicationName()}`}
-                        />
-                    </ListItem>
                 </View>
 
                 <Divider />
