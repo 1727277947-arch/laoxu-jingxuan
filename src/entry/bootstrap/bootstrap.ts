@@ -1,4 +1,4 @@
-import "react-native-get-random-values";
+﻿import "react-native-get-random-values";
 
 import { getCurrentDialog, showDialog } from "@/components/dialogs/useDialog.ts";
 import { ImgAsset } from "@/constants/assetsConst";
@@ -16,6 +16,7 @@ import TrackPlayer from "@/core/trackPlayer";
 import NativeUtils from "@/native/utils";
 import { checkAndCreateDir } from "@/utils/fileUtils";
 import { errorLog, trace } from "@/utils/log";
+import { copyFileAssets, exists } from "react-native-fs";
 import { IPerfLogger, perfLogger } from "@/utils/perfLogger";
 import PersistStatus from "@/utils/persistStatus";
 import Toast from "@/utils/toast";
@@ -77,6 +78,7 @@ async function bootstrapImpl() {
     /** 初始化路径 */
     await setupFolder();
     trace("文件夹初始化完成");
+    await ensureBundledPlugins();
     logger.mark("文件夹初始化完成");
 
 
@@ -132,6 +134,31 @@ async function bootstrapImpl() {
 }
 
 /** 初始化 */
+// 内置曲库插件：首次启动把 APK 内置的插件复制到插件目录，之后 setup 会自动加载
+const BUNDLED_PLUGINS = [
+    "yuanli_KW_kuwo.js",
+    "yuanli_KG_kugou.js",
+    "yuanli_MG_migu.js",
+    "yuanli_QQ.js",
+    "yuanli_WY_wangyi.js",
+    "kuwo.js",
+];
+
+async function ensureBundledPlugins() {
+    for (const fileName of BUNDLED_PLUGINS) {
+        const dest = `${pathConst.pluginPath}${fileName}`;
+        try {
+            if (await exists(dest)) {
+                continue;
+            }
+            await copyFileAssets(`musicfree-plugins/${fileName}`, dest);
+            trace(`内置插件已就位: ${fileName}`);
+        } catch (e) {
+            errorLog("内置插件复制失败", `${fileName}: ` + e);
+        }
+    }
+}
+
 async function setupFolder() {
     await Promise.all([
         checkAndCreateDir(pathConst.dataPath),
